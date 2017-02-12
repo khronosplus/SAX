@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.stats import zscore
 
-
 # from multiprocessing import Pool
 
 class PAA(object):
@@ -32,6 +31,10 @@ class PAA(object):
 
     def piece(self, i):
         return self.data[slice(i * self.width, (i + 1) * self.width)]
+
+    def pieces(self):
+        for i in range(self.npart):
+            yield self.piece(i)
 
     def calculate(self, nworkers=2):
         # with Pool(2) as p:
@@ -69,7 +72,7 @@ class SAX(object):
         for i, b in enumerate(breakpoints):
             if x < b:
                 return self.letters[i]
-        return self.letters[self.card]
+        return self.letters[self.card-1]
 
     def calculate(self):
         self.result = list(map(self.lookup, self.paa.result))
