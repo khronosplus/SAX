@@ -1,5 +1,7 @@
-import numpy as np
 from multiprocessing import Pool
+
+import numpy as np
+
 
 class normalize(object):
     """
@@ -23,15 +25,13 @@ class normalize(object):
         pass
 
     def chunk(self, i):
-        return self.data[]
+        #return self.data[]
+        pass
 
     def getChunks(self, nchunks=10):
         pass
 
+    def getMeans(self):
+        pass
 
-class chunk(object):
-    def __init__(self, data, chunksize = 10):
-        self.data = data
-        self.chunksize = chunksize
-        self.nchunks = np.ceil(len(self.data) / self.chunksize)
 
