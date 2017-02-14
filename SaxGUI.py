@@ -74,12 +74,14 @@ class SaxGUI:
 
 
 # generate random time series
-np.random.seed(1)
-npoints = 100
-x = list(range(npoints))
-data = np.random.randn(npoints)
-data = data.cumsum()
+if __name__ == '__main__':
+    #freeze_support()
+    np.random.seed(1)
+    npoints = 100
+    x = list(range(npoints))
+    data = np.random.randn(npoints)
+    data = data.cumsum()
 
-root = tkinter.Tk()
-app = SaxGUI(root, data=data)
-root.mainloop()
+    root = tkinter.Tk()
+    app = SaxGUI(root, data=data)
+    root.mainloop()
