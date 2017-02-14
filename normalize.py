@@ -1,37 +1,55 @@
-from multiprocessing import Pool
-
 import numpy as np
+from partition import partition
+from multiprocessing import Pool
 
 
 class normalize(object):
     """
     perform a parallel (MapReduce) z-normalization
     """
-    def __init__(self, data=None, nworkers=2, chunksize=10):
-        self.pool = Pool(nworkers)
-        self.chunksize = chunksize
+    def __init__(self, data=None, nworkers=2, partitionsize=10):
+        self.nworkers = nworkers
+        self.partitionsize = partitionsize
+        self.params = None
         if data is not None:
             self.read(data)
 
     def read(self, data):
         self.data = data
-        self.nchunks = np.ceil( len(self.data) // self.chunksize )
+        self.partition = partition(data, self.partitionsize)
 
     def getParams(self):
-        with self.pool as p:
-            p.map(self.getMeans, self.getChunks())
+        with Pool(self.nworkers) as p:
+            means = p.map(self.getMeans, self.partition)
+        #means = list(map(self.getMeans, self.partition))
+        res = (0, 0, 0)
+        for m in means:
+            res = self.addMeans(m, res)
+        self.params = (res[1], np.sqrt(res[2] - res[1]**2))
+        return self.params
 
-    def norm(self):
-        pass
+    def getMeans(self, data):
+        return (len(data), np.mean(data), np.mean(data*data))
 
-    def chunk(self, i):
-        #return self.data[]
-        pass
+    @staticmethod
+    def addMeans(a, b):
+        # https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Parallel_algorithm
+        m1 = (a[0] * a[1] + b[0] * b[1]) / (a[0] + b[0])
+        m2 = (a[0] * a[2] + b[0] * b[2]) / (a[0] + b[0])
+        return (a[0] + b[0], m1, m2)
 
-    def getChunks(self, nchunks=10):
-        pass
+    def calculate(self):
+        if self.params is None:
+            self.getParams()
+        mean, std = self.params
+        for i in range(len(self.partition)):
+            self.partition[i] = (self.partition[i] - mean) / std
+        return self
 
-    def getMeans(self):
-        pass
 
+if __name__ == "__main__":
+    dat = np.array(range(100))
+    part = normalize(dat.astype(np.float64)).calculate()
+    from scipy.stats import zscore
+    assert( sum(zscore(dat) - part.data) == 0 )
 
