@@ -1,12 +1,16 @@
 import numpy as np
 from scipy.stats import zscore
 
-# from multiprocessing import Pool
+from multiprocessing import Pool
+NWORKERS = 2
 
 class PAA(object):
+    """
+    calculates the piecewise aggregate approximation
+
+    """
     def __init__(self, data=None, width=5, normalize=True):
         """
-
         :param data: numpy array that contains the time series
         :param width: size of the aggregate pieces
         :param normalize: if True time series will be z-normalized
@@ -37,8 +41,9 @@ class PAA(object):
             yield self.piece(i)
 
     def calculate(self, nworkers=2):
-        # with Pool(2) as p:
-        self.result = list(map(np.mean, [self.piece(i) for i in range(self.npart)]))
+        with Pool(NWORKERS) as p:
+            self.result = p.map(np.mean, self.pieces())
+        #self.result = list(map(np.mean, [p for p in self.pieces()]))
         return self
 
 
@@ -75,5 +80,6 @@ class SAX(object):
         return self.letters[self.card-1]
 
     def calculate(self):
-        self.result = list(map(self.lookup, self.paa.result))
+        with Pool(NWORKERS) as p:
+            self.result = p.map(self.lookup, self.paa.result)
         return self
