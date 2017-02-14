@@ -1,6 +1,6 @@
 import numpy as np
 
-class Partition(object):
+class partition(object):
     def __init__(self, data, partitionsize = 10):
         self.data = data
         self.partitionsize = partitionsize

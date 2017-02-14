@@ -1,8 +1,9 @@
 import numpy as np
 from scipy.stats import zscore
+from partition import partition
 
-from multiprocessing import Pool
-NWORKERS = 2
+from multiprocessing import Pool, freeze_support
+NWORKERS = 1
 
 class PAA(object):
     """
@@ -16,34 +17,26 @@ class PAA(object):
         :param normalize: if True time series will be z-normalized
         """
         self.result = None
-        self.length = None
+        self.data = None
         self.setWidth(width)
         if data is not None:
             self.read(data, normalize=normalize)
 
     def setWidth(self, width):
         self.width = width
-        if self.length is not None:
-            self.npart = np.ceil(self.length / self.width).astype(np.uint32)
+        if self.data is not None:
+            self.partitions = partition(self.data, partitionsize=self.width)
 
     def read(self, data, normalize=True):
-        self.data = data
         if normalize:
-            self.data = zscore(self.data)
-        self.length = len(self.data)
-        self.npart = np.ceil(self.length / self.width).astype(np.uint32)
-
-    def piece(self, i):
-        return self.data[slice(i * self.width, (i + 1) * self.width)]
-
-    def pieces(self):
-        for i in range(self.npart):
-            yield self.piece(i)
+            data = zscore(data)
+        self.data = data
+        self.partitions = partition(self.data, partitionsize=self.width)
 
     def calculate(self, nworkers=2):
-        with Pool(NWORKERS) as p:
-            self.result = p.map(np.mean, self.pieces())
-        #self.result = list(map(np.mean, [p for p in self.pieces()]))
+        #with Pool(NWORKERS) as p:
+        #    self.result = p.map(np.mean, self.pieces())
+        self.result = list(map(np.mean, self.partitions))
         return self
 
 
@@ -80,6 +73,7 @@ class SAX(object):
         return self.letters[self.card-1]
 
     def calculate(self):
-        with Pool(NWORKERS) as p:
-            self.result = p.map(self.lookup, self.paa.result)
+        #with Pool(NWORKERS) as p:
+        #    self.result = p.map(self.lookup, self.paa.result)
+        self.result = list(map(self.lookup, self.paa.result))
         return self
