@@ -38,12 +38,18 @@ class normalize(object):
         m2 = (a[0] * a[2] + b[0] * b[2]) / (a[0] + b[0])
         return (a[0] + b[0], m1, m2)
 
+    def norm(self, i):
+        mean, std = self.params
+        return ( self.partition[i] - mean ) / std
+
     def calculate(self):
         if self.params is None:
             self.getParams()
-        mean, std = self.params
-        for i in range(len(self.partition)):
-            self.partition[i] = (self.partition[i] - mean) / std
+        with Pool(self.nworkers) as p:
+            result = p.map(self.norm, range(self.partition.npartitions))
+        self.read(np.concatenate(result))
+        #for i in range(self.partition.npartitions):
+        #    self.norm(i)
         return self
 
 
@@ -51,5 +57,5 @@ if __name__ == "__main__":
     dat = np.array(range(100))
     part = normalize(dat.astype(np.float64)).calculate()
     from scipy.stats import zscore
-    assert( sum(zscore(dat) - part.data) == 0 )
+    assert (sum(zscore(dat) - part.data) == 0)
 
