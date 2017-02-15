@@ -5,6 +5,7 @@ from sax import *
 
 class SaxGUI:
     def __init__(self, master, data=None):
+        self.nDataPoints = 100
         self.sax = SAX( PAA(data, width=5).calculate())
         self.layout(master)
 
@@ -21,6 +22,12 @@ class SaxGUI:
                                            command=self.set_sax_card)
         self.cardScale.set(self.sax.card)
         self.cardScale.pack(side="bottom")
+
+        self.dataScale = tkinter.Scale(frame, label="data seed", orient=tkinter.HORIZONTAL,
+                                       from_=1, to=100, length=300,
+                                       command=self.set_data)
+        self.dataScale.set(1)
+        self.dataScale.pack(side="bottom")
 
         fig = Figure()
         self.ax = fig.add_subplot(111)
@@ -49,7 +56,7 @@ class SaxGUI:
             high = min(l - 1, (i + 1) * w)
             self.ax.plot([x[low], x[high]], [d, d], 'r-')
             binmid = (x[low]+x[high])/2
-            self.ax.text(binmid, -2, self.sax.result[i], fontsize=12)
+            self.ax.text(binmid, min(self.sax.paa.data)-0.1, self.sax.result[i], fontsize=12)
             mids.append(binmid)
         self.ax.plot(mids, self.sax.paa.result, 'ro')
 
@@ -59,18 +66,27 @@ class SaxGUI:
             y = self.sax.breakpointLookup[card-2][c]
             self.ax.plot([x[0], x[-1]], [y, y], 'k--', alpha=0.5)
 
+    def refresh(self):
+        self.draw()
+        self.canvas.draw()
+
+    def set_data(self, seed):
+        np.random.seed(int(seed))
+        npoints = self.nDataPoints
+        data = np.random.randn(npoints)
+        data = data.cumsum()
+        self.sax = SAX(PAA(data, width=self.widthScale.get()).calculate())
+        self.refresh()
 
     def set_paa_width(self, width):
         # callback for the PAA width scale
         self.sax.paa.setWidth(int(width))
-        self.draw()
-        self.canvas.draw()
+        self.refresh()
 
     def set_sax_card(self, card):
         # callback for the SAX cardinality scale
         self.sax.setCardinality(int(card))
-        self.draw()
-        self.canvas.draw()
+        self.refresh()
 
 
 # generate random time series
