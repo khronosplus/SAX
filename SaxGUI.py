@@ -1,6 +1,7 @@
 import tkinter
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+import numpy as np
 from sax import *
 
 class SaxGUI:
@@ -94,7 +95,6 @@ if __name__ == '__main__':
     #freeze_support()
     np.random.seed(1)
     npoints = 100
-    x = list(range(npoints))
     data = np.random.randn(npoints)
     data = data.cumsum()
 
