@@ -19,12 +19,12 @@ class normalize(object):
         self.partition = partition(data, self.partitionsize)
 
     def getParams(self):
-        with Pool(self.nworkers) as p:
-            means = p.map(self.getMeans, self.partition)
-        #means = list(map(self.getMeans, self.partition))
         res = (0, 0, 0)
-        for m in means:
-            res = self.addMeans(m, res)
+        with Pool(self.nworkers) as p:
+            for m in p.imap_unordered(self.getMeans, self.partition):
+                res = self.addMeans(m, res)
+        #means = list(map(self.getMeans, self.partition))
+
         self.params = (res[1], np.sqrt(res[2] - res[1]**2))
         return self.params
 
