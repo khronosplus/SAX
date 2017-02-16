@@ -16,13 +16,13 @@ class fftGUI:
         # generate tkinter scales and widgets
         frame = tkinter.Frame(master)
         self.nModeScale = tkinter.Scale(frame, label="# fft modes", orient=tkinter.HORIZONTAL,
-                                        from_=1, to=20, length=300,
+                                        from_=1, to=50, length=500,
                                         command=self.set_n_modes)
         self.nModeScale.set(self.nModes)
         self.nModeScale.pack(side="bottom")
 
         self.dataScale = tkinter.Scale(frame, label="data seed", orient=tkinter.HORIZONTAL,
-                                       from_=1, to=100, length=300,
+                                       from_=1, to=100, length=500,
                                        command=self.set_data)
         self.dataScale.set(1)
         self.dataScale.pack(side="bottom")
@@ -41,9 +41,12 @@ class fftGUI:
         self.ax.plot(self.data, 'b-')
         k = self.nModes
         fft = fftpack.fft(self.data)
-        fft[k + 1:-k] = 0
+        fft[k+1:-k] = 0
         fft_fit = fftpack.ifft(fft).real
         self.ax.plot(fft_fit, 'r-')
+        amplitudes = 2. / self.nDataPoints * np.abs(fft[1:k + 1])
+        wavelengths = self.nDataPoints / np.arange(1, k + 1)
+        self.ax.bar(wavelengths, amplitudes, color='g', alpha=0.2, width=1.5)
 
     def refresh(self):
         self.draw()
