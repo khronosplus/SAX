@@ -23,8 +23,6 @@ class normalize(object):
         with Pool(self.nworkers) as p:
             for m in p.imap_unordered(self.getMeans, self.partition):
                 res = self.addMeans(m, res)
-        #means = list(map(self.getMeans, self.partition))
-
         self.params = (res[1], np.sqrt(res[2] - res[1]**2))
         return self.params
 
@@ -48,8 +46,6 @@ class normalize(object):
         with Pool(self.nworkers) as p:
             result = p.map(self.norm, range(self.partition.npartitions))
         self.read(np.concatenate(result))
-        #for i in range(self.partition.npartitions):
-        #    self.norm(i)
         return self
 
 

@@ -34,9 +34,9 @@ class PAA(object):
         self.partitions = partition(self.data, partitionsize=self.width)
 
     def calculate(self, nworkers=2):
-        #with Pool(NWORKERS) as p:
-        #    self.result = p.map(np.mean, self.pieces())
-        self.result = list(map(np.mean, self.partitions))
+        with Pool(NWORKERS) as p:
+            self.result = p.map(np.mean, self.partitions)
+        #self.result = list(map(np.mean, self.partitions))
         return self
 
 
@@ -73,7 +73,7 @@ class SAX(object):
         return self.letters[self.card-1]
 
     def calculate(self):
-        #with Pool(NWORKERS) as p:
-        #    self.result = p.map(self.lookup, self.paa.result)
-        self.result = list(map(self.lookup, self.paa.result))
+        with Pool(NWORKERS) as p:
+            self.result = p.map(self.lookup, self.paa.result)
+        #self.result = list(map(self.lookup, self.paa.result))
         return self

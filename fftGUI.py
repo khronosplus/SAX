@@ -61,14 +61,12 @@ class fftGUI:
         self.refresh()
 
     def set_n_modes(self, n):
-        # callback for the PAA width scale
         self.nModes = int(n)
         self.refresh()
 
 
 # generate random time series
 if __name__ == '__main__':
-    #freeze_support()
     np.random.seed(1)
     npoints = 100
     data = np.random.randn(npoints)
